@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import _ from 'lodash';
 import { onCLS, onFCP, onLCP } from 'web-vitals';
 import './styles.css';
 
@@ -41,7 +40,7 @@ function SkeletonGrid() {
 }
 
 function ArticleCard({ article }: { article: Article }) {
-  return <article className="article-card"><img src={article.image} alt="" /><div className="article-content"><span className="eyebrow">{article.category}</span><h3>{article.title}</h3><p>{article.summary}</p><div className="meta"><span>{article.author}</span><span>{article.time}</span></div></div></article>;
+  return <article className="article-card"><img src={article.image} alt="" width="900" height="600" loading="lazy" /><div className="article-content"><span className="eyebrow">{article.category}</span><h3>{article.title}</h3><p>{article.summary}</p><div className="meta"><span>{article.author}</span><span>{article.time}</span></div></div></article>;
 }
 
 function App() {
@@ -49,21 +48,21 @@ function App() {
   const [showAd, setShowAd] = useState(false);
 
   useEffect(() => {
-    initAnalytics();
+    const analyticsTimer = setTimeout(initAnalytics, 0);
     const fetchTimer = setTimeout(() => setLoaded(true), 850);
     const adTimer = setTimeout(() => setShowAd(true), 1200);
     onCLS((metric) => console.log('CLS', metric));
     onFCP((metric) => console.log('FCP', metric));
     onLCP((metric) => console.log('LCP', metric));
-    return () => { clearTimeout(fetchTimer); clearTimeout(adTimer); };
+    return () => { clearTimeout(analyticsTimer); clearTimeout(fetchTimer); clearTimeout(adTimer); };
   }, []);
 
-  const sortedArticles = _.sortBy(articles, ['id']);
+  const sortedArticles = [...articles].sort((first, second) => first.id - second.id);
 
   return <>
     <header className="site-header"><a className="brand" href="/">SIGNAL<span>.</span></a><nav><a href="#latest">Latest</a><a href="#topics">Topics</a><a href="#about">About</a></nav><button className="subscribe">Subscribe <span>↗</span></button></header>
     <main>
-      <section className="hero"><div className="hero-copy"><span className="kicker">The daily brief / 16 Sep 2026</span><h1>Ideas for a more <em>considered</em> world.</h1><p>Signal is a daily edit of the shifts shaping how we shop, work, and live.</p><a className="read-link" href="#latest">Explore the latest <span>↓</span></a></div><img className="hero-image" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1800&q=90" alt="Sunlit modern workspace" loading="lazy" /></section>
+      <section className="hero"><div className="hero-copy"><span className="kicker">The daily brief / 16 Sep 2026</span><h1>Ideas for a more <em>considered</em> world.</h1><p>Signal is a daily edit of the shifts shaping how we shop, work, and live.</p><a className="read-link" href="#latest">Explore the latest <span>↓</span></a></div><img className="hero-image" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1800&q=90&fm=webp" alt="Sunlit modern workspace" width="1800" height="1200" fetchPriority="high" /></section>
       <div className="ad-slot">{showAd && <span>Partner message <strong>Make room for what matters.</strong></span>}</div>
       <section className="feed-layout" id="latest"><div className="feed-main"><div className="section-heading"><div><span className="kicker">The edit</span><h2>Latest stories</h2></div><span className="count">{sortedArticles.length} stories</span></div>{!loaded ? <SkeletonGrid /> : <div className="article-grid">{sortedArticles.map((article) => <ArticleCard article={article} key={article.id} />)}</div>}<div className="infinite-trigger">You’re all caught up <span>✦</span></div></div><aside><div className="aside-heading"><span className="kicker">In the margin</span><span>Popular</span></div>{articles.slice(0, 6).map((article, index) => <a className="side-story" href="#latest" key={article.id}><span className="side-number">0{index + 1}</span><div><span className="eyebrow">{article.category}</span><h3>{article.title}</h3></div></a>)}</aside></section>
     </main><footer><span className="brand">SIGNAL<span>.</span></span><span>Independent perspective for curious people.</span><span>© 2026 Signal Journal</span></footer>
